@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 #include "MetaData.h"
 
 #define CAT(X,Y) CAT2(X,Y)
@@ -141,11 +142,14 @@ void GenerateMetaDataFile() {
             auto metaData = val->mMetaData->mMetaData;
             auto descriptors = val->mMetaData->mDescriptors;
 
+            std::string filename{ metaData.mFilename };
+            std::replace(filename.begin(), filename.end(), '\\', '/');
+
             outputFile << "  {\n";
             outputFile << "    \"MetaDataId\"      : " << std::to_string(val->mId) << ",\n";
             outputFile << "    \"Level\"           : \"" << metaData.mLevel << "\",\n";
             outputFile << "    \"Function\"        : \"" << metaData.mFuncSig << "\",\n";
-            outputFile << "    \"Filename\"        : \"" << metaData.mFilename << "\",\n";
+            outputFile << "    \"Filename\"        : \"" << filename << "\",\n";
             outputFile << "    \"Line\"            : " << std::to_string(metaData.mLine) << ",\n";
             outputFile << "    \"Message\"         : \"" << metaData.mFormat << "\",\n";
             outputFile << "    \"Translations\"    : [\n";
@@ -164,22 +168,23 @@ void GenerateMetaDataFile() {
                 if (index == 1) {
                     auto type = std::get<1>(descriptor);
                     auto text = type.GetType();
-                    outputFile << text;
+                    outputFile << "\"" <<text <<"\"";
                 }
                 else if (index == 2) {
                     auto type = std::get<2>(descriptor);
                     auto text = type.GetType();
-                    outputFile << text;
+                    outputFile << "\"" << text << "\"";
                 }
                 if (&descriptor != &descriptors.back()) {
                     outputFile << ", ";
                 }
             }
             outputFile << " ]\n";
-            outputFile << "  }\n";
+            outputFile << "  }";
             if (&val != &nodes.back()) {
                 outputFile << ",";
             }
+            outputFile << '\n';
         }
         outputFile << "]\n";
     }

@@ -24,7 +24,6 @@ int main()
     //Check if Message Nodes are generated pre-main
     assert(nodes.size() == 3);
     GenerateMetaFiles();
-
     srand(static_cast<unsigned int>(time(NULL)));
     auto x = rand() % 3;
     DoSomething(x);    

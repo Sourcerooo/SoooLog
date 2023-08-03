@@ -10,8 +10,11 @@
 #define CAT2(X,Y) X##Y
 #define USABLE_LINE int(CAT(__LINE__,U)) 
 
+#ifndef _MSC_VER
 #ifndef __FUNCSIG__
+//#ifndef __FUNCTION__
 #define __FUNCSIG__ __PRETTY_FUNCTION__
+#endif
 #endif
 
 #define LOG_DEBUG(format, ...) LOG(Debug, format, __VA_ARGS__)
@@ -30,9 +33,20 @@
 }
 
 
-int GetId() {
-    static int i = -1;
+size_t GetId() {
+    static size_t i = 0;
     return ++i;
+}
+
+static constexpr size_t cSeed = 0xEA35D32C643E04EB;
+
+constexpr size_t GetIdHash(std::string_view pStringView)
+{  
+  size_t d = (0xCBF29CE484222325 ^ cSeed) * static_cast<size_t>(0x100000001B3);
+  for(auto& c : pStringView) {
+    d = (d ^ static_cast<size_t>(c)) * static_cast<size_t>(0x01000193);
+  }
+  return d>>8;
 }
 
 static constexpr std::string_view Debug = "Debug";
@@ -47,11 +61,11 @@ struct LogMetaDataNode {
     template<typename ...ARGS>
     LogMetaDataNode(MetaDataStatement const* pMetaData, ARGS&... args) {
         mMetaData = pMetaData;
-        mId = GetId();
+        mId = GetIdHash(mMetaData->mMetaData.mFormat);        
         nodes.push_back(this);
     }
     MetaDataStatement const* mMetaData;
-    int32_t mId;
+    size_t mId;
     std::vector<TypeDescriptor> mDescriptors;
 };
 
@@ -75,11 +89,11 @@ void OutputArguments(ARGS&&... args) {
 }
 
 template<typename ...ARGS>
-void Serialize(int32_t pMetaDataId, ARGS&&... args) {
+void Serialize(size_t pMetaDataId, ARGS&&... args) {
     //OutputMetaData(pMetaData);
     std::cout << "Logging Metadata: " << std::to_string(pMetaDataId) << " ";
     OutputArguments(args...);
-    std::cout << "\n\n\n";
+    //std::cout << "\n";
 }
 
 template<typename F, typename ...ARGS>

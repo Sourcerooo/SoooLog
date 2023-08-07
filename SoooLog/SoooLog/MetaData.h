@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <string>
 #include <variant>
 #include <span>
@@ -34,6 +35,7 @@ struct MetaData {
   std::string_view   mFilename;
   int32_t            mLine;
   MessageTranslation mTranslation;
+  size_t             mId;
 };
 
 struct MetaDataStatement {
@@ -42,60 +44,36 @@ struct MetaDataStatement {
 };
 
 template <typename T>
-constexpr TypeDescriptor GetTypeDescriptor2()
+constexpr TypeDescriptor GetTypeDescriptor()
 {
+  assert((0 == 1) && "Template specialization of GetTypeDescriptor not implemented for this type");
   return Undefined{};
 }
 
 template<typename T>
   requires std::is_same_v<T, int>
-constexpr TypeDescriptor GetTypeDescriptor2(){
+constexpr TypeDescriptor GetTypeDescriptor(){
   return Int{};
 }
 
 template<typename T>
   requires std::is_same_v<T, double>
-constexpr TypeDescriptor GetTypeDescriptor2(){
+constexpr TypeDescriptor GetTypeDescriptor(){
   return Double{};
 }
 
 template<typename T>
   requires std::is_same_v<T, std::string>
-constexpr TypeDescriptor GetTypeDescriptor2(){
+constexpr TypeDescriptor GetTypeDescriptor(){
   return String{};
 }
 
 template<typename T>
   requires std::is_same_v<T, const char*>
-constexpr TypeDescriptor GetTypeDescriptor2(){
+constexpr TypeDescriptor GetTypeDescriptor(){
   return CharConst{};
 }
 
-
-template <typename T>
-struct GetTypeDescriptor {
-  static constexpr TypeDescriptor cValue{ Undefined{} };
-};
-
-template <>
-struct GetTypeDescriptor<int> {
-  static constexpr TypeDescriptor cValue{ Int{} };
-};
-
-template <>
-struct GetTypeDescriptor<double> {
-  static constexpr TypeDescriptor cValue{ Double{} };
-};
-
-template <>
-struct GetTypeDescriptor<char const*> {
-  static constexpr TypeDescriptor cValue{ CharConst{} };
-};
-
-template <>
-struct GetTypeDescriptor<std::string> {
-  static constexpr TypeDescriptor cValue{ String{} };
-};
 
 //Specialization for no parameter passed
 template <typename F>
@@ -111,7 +89,7 @@ MetaDataStatement const* GetMetaData()
 template <typename F, typename T, typename... ARGS>
 MetaDataStatement const* GetMetaData()
 {  
-  static constexpr std::array        tempDescriptors{ GetTypeDescriptor2<T>(), GetTypeDescriptor2<ARGS>()...};
+  static constexpr std::array        tempDescriptors{ GetTypeDescriptor<T>(), GetTypeDescriptor<ARGS>()...};
   static constexpr std::span         descriptors{ tempDescriptors };
   static constexpr MetaDataStatement m{ F{}(), descriptors };
   return &m;

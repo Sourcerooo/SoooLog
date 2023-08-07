@@ -25,7 +25,7 @@ void DoSomething(int i)
 
 int main()
 {
-  static constexpr auto mTranslation = GetTranslation("LogMessage 1 {} {}");
+  static constexpr auto mTranslation = GetTranslation(2);
   //Check if translations are generated at compile time
   static_assert(mTranslation[0] == LanguageTextPair{ "de", "Protokolnachricht 1 {} {}" });
   //Check if Message Nodes are generated pre-main 
@@ -38,7 +38,7 @@ int main()
   DoSomething(5);
   GenerateMetaFiles();
   for(auto* node : gNodes) {
-    std::cout << "Logging Meta. Id: " << node->mId << " Size Descriptors: " << node->mDescriptors.size() << " Size MetaDescriptors: " << node->mMetaData->mDescriptors.size() << std::endl;
+    std::cout << "Logging Meta. Id: " << node->mMetaData->mMetaData.mId << " Size MetaDescriptors: " << node->mMetaData->mDescriptors.size() << std::endl;
     for (auto const& descriptor : node->mMetaData->mDescriptors) {
 
       std::cout << "    Index: " << descriptor.index();
@@ -60,7 +60,7 @@ int main()
     }
     std::cout << std::endl;
   }
-  //LOG_ERROR("Log after doosomesing")
+  LOG_ERROR("Log after doosomesing")
  
   //static constexpr std::array<int,0> tempDescriptors{  };
   //static constexpr std::span descriptors{ tempDescriptors };

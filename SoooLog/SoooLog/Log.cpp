@@ -3,12 +3,14 @@
 #include <algorithm>
 #include <fstream>
 
-size_t GetId() {
+auto GetId() -> size_t
+{
   static size_t i = 0;
   return ++i;
 }
 
-void GenerateTranslationFile() {
+void GenerateTranslationFile()
+{
   std::ofstream outputFile{ "translation_new.h" };
   if (!outputFile.is_open()) {
     return;
@@ -29,8 +31,9 @@ void GenerateTranslationFile() {
   outputFile << "static constexpr Translations sTranslations{\n";
   outputFile << "    {\n";
   for (auto& val : gNodes) {
-    auto format       = val->mMetaData->mMetaData.mFormat;
-    auto id = val->mMetaData->mMetaData.mId;
+    auto format = val->mMetaData->mMetaData.mFormat;
+    auto id     = val->mId;
+    //auto id = val->mMetaData->mMetaData.mId;
     auto translations = GetTranslation(id);
     outputFile << "         {" << id << ", LanguageTextList{ {";
     for (auto const& translationPair : translations) {
@@ -56,26 +59,29 @@ void GenerateTranslationFile() {
   outputFile.close();
 }
 
-void GenerateMetaDataFile() {
+void GenerateMetaDataFile()
+{
   std::ofstream outputFile{ "metadata.json" };
   if (!outputFile.is_open()) {
     return;
   }
   outputFile << "[\n";
   for (auto const& val : gNodes) {
-    auto metaData    = val->mMetaData->mMetaData;
-    auto descriptors = val->mMetaData->mDescriptors;
+    auto const id          = val->mId;
+    auto       metaData    = val->mMetaData->mMetaData;
+    auto       descriptors = val->mMetaData->mDescriptors;
 
     std::string filename{ metaData.mFilename };
     std::ranges::replace(filename, '\\', '/');
 
-    
+
     outputFile << R"(  {)" << ",\n";
-    outputFile << R"(    "Id"              : )"  << std::to_string(metaData.mId) << ",\n";
+    outputFile << R"(    "Id"              : )" << std::to_string(id) << ",\n";
+    //outputFile << R"(    "Id"              : )" << std::to_string(metaData.mId) << ",\n";
     outputFile << R"(    "Level"           : ")" << metaData.mLevel << "\",\n";
     outputFile << R"(    "Function"        : ")" << metaData.mFuncSig << "\",\n";
     outputFile << R"(    "Filename"        : ")" << filename << "\",\n";
-    outputFile << R"(    "Line"            : )"  << std::to_string(metaData.mLine) << ",\n";
+    outputFile << R"(    "Line"            : )" << std::to_string(metaData.mLine) << ",\n";
     outputFile << R"(    "Message"         : ")" << metaData.mFormat << "\",\n";
     outputFile << R"(    "Translations"    : [
 )";
@@ -129,7 +135,8 @@ void GenerateMetaDataFile() {
   outputFile << "]\n";
 }
 
-void GenerateMetaFiles() {
+void GenerateMetaFiles()
+{
   std::cout << "--- Generating meta files ---\n";
   GenerateTranslationFile();
   GenerateMetaDataFile();

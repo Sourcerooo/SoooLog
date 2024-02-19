@@ -50,27 +50,31 @@ constexpr TypeDescriptor GetTypeDescriptor()
   return Undefined{};
 }
 
-template<typename T>
+template <typename T>
   requires std::is_same_v<T, int>
-constexpr TypeDescriptor GetTypeDescriptor(){
+constexpr TypeDescriptor GetTypeDescriptor()
+{
   return Int{};
 }
 
-template<typename T>
+template <typename T>
   requires std::is_same_v<T, double>
-constexpr TypeDescriptor GetTypeDescriptor(){
+constexpr TypeDescriptor GetTypeDescriptor()
+{
   return Double{};
 }
 
-template<typename T>
+template <typename T>
   requires std::is_same_v<T, std::string>
-constexpr TypeDescriptor GetTypeDescriptor(){
+constexpr TypeDescriptor GetTypeDescriptor()
+{
   return String{};
 }
 
-template<typename T>
+template <typename T>
   requires std::is_same_v<T, const char*>
-constexpr TypeDescriptor GetTypeDescriptor(){
+constexpr TypeDescriptor GetTypeDescriptor()
+{
   return CharConst{};
 }
 
@@ -88,11 +92,9 @@ MetaDataStatement const* GetMetaData()
 //Generalization for at least one parameter passed
 template <typename F, typename T, typename... ARGS>
 MetaDataStatement const* GetMetaData()
-{  
-  static constexpr std::array        tempDescriptors{ GetTypeDescriptor<T>(), GetTypeDescriptor<ARGS>()...};
+{
+  static constexpr std::array        tempDescriptors{ GetTypeDescriptor<T>(), GetTypeDescriptor<ARGS>()... };
   static constexpr std::span         descriptors{ tempDescriptors };
   static constexpr MetaDataStatement m{ F{}(), descriptors };
   return &m;
 }
-
-

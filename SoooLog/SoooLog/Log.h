@@ -6,9 +6,9 @@
 #include "MetaData.h"
 
 #ifndef _MSC_VER
-  #ifndef __FUNCSIG__
+#ifndef __FUNCSIG__
     #define __FUNCSIG__ __PRETTY_FUNCTION__
-  #endif
+#endif
 #endif
 
 #define CAT(X,Y) CAT2(X,Y)
@@ -32,9 +32,10 @@
 
 static constexpr size_t gSeed = 0xEA35D32C643E04EB;
 auto                    GetId() -> size_t;
-constexpr auto          GetIdHash(std::string_view const pStringView) -> size_t
+
+constexpr auto GetIdHash(std::string_view const pStringView) -> size_t
 {
-   size_t d = (0xCBF29CE484222325 ^ gSeed) * static_cast<size_t>(0x100000001B3);
+  size_t d = (0xCBF29CE484222325 ^ gSeed) * static_cast<size_t>(0x100000001B3);
   for (auto& c : pStringView) {
     d = (d ^ static_cast<size_t>(c)) * static_cast<size_t>(0x01000193);
   }
@@ -55,12 +56,13 @@ struct LogMetaDataNode {
                            [[maybe_unused]] ARGS&... pArgs) :
     mMetaData{ pMetaData }
   {
+    mId = GetId();
     //mId = GetIdHash(mMetaData->mMetaData.mFormat);
     gNodes.push_back(this);
   }
 
-  MetaDataStatement const*    mMetaData;
-  //size_t                      mId;  
+  MetaDataStatement const* mMetaData;
+  size_t                   mId;
 };
 
 constexpr MetaData GenerateLog(std::string_view level,
@@ -77,13 +79,13 @@ template <typename F, typename... ARGS>
 inline LogMetaDataNode metaDataNode{ GetMetaData<F, ARGS...>() };
 
 template <typename T>
-requires std::is_arithmetic_v<T>
+  requires std::is_arithmetic_v<T>
 std::string SerializeIO(T const& pValue)
 {
   return std::to_string(pValue);
 }
 
-template <typename T>  
+template <typename T>
 std::string SerializeIO(T const& pValue)
 {
   return pValue;
@@ -102,7 +104,6 @@ template <typename... ARGS>
 void Serialize(size_t    pMetaDataId,
                ARGS&&... args)
 {
-  
   std::cout << "Logging Metadata: " << std::to_string(pMetaDataId) << " ";
   OutputArguments(args...);
 }
@@ -119,7 +120,7 @@ void Log(ARGS const&... args)
 template <typename F>
 void Log()
 {
-  auto metaDataId = metaDataNode<F>.mMetaData->mMetaData.mId;  
+  auto metaDataId = metaDataNode<F>.mMetaData->mMetaData.mId;
   Serialize(metaDataId);
 }
 
